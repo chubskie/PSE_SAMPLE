@@ -80,17 +80,34 @@ if (!isset($_POST['edit'])) {
         $birth_date = strval($birth_date->format("Y-m-d"));
 
         $query = "UPDATE residents
-                    SET family_name = '$family_name',
-                        given_name = '$given_name',
-                        middle_name = '$middle_name',
-                        birth_date = '$birth_date',
-                        monthly_salary = '$monthly_salary' WHERE resident_code = '$resident_code'";
+                    SET family_name = ?,
+                        given_name = ?,
+                        middle_name = ?,
+                        birth_date = ?,
+                        monthly_salary = ? WHERE resident_code = ?";
 
-        if ($connection->query($query)) {
-            $connection->close();
-            header("Location: index.php");
+        $statement = $connection->prepare($query);
+
+        if ($statement) {
+            $statement->bind_param("ssssds",
+                            $family_name,
+                            $given_name,
+                            $middle_name,
+                            $birth_date,
+                            $monthly_salary,
+                            $resident_code);
+            if ($statement->execute()) {
+                $statement->close();
+                header("Location: index.php");
+                exit;
+            } else {
+                error_log("Insert error: " . $statement->error);
+                echo "Error: Failed to add resident.";
+                $statement->close();
+            }
         } else {
-            echo "Error: " . $connection->error;
+            error_log("Prepare error: " . $connection->error);
+            error_log("Database error: " . $connection->error);
         }
     }
 }
