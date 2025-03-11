@@ -7,6 +7,7 @@ $errors = [];
 
 $resident_code = null;
 $year = null;
+$grant = null;
 
 $query1 = "SELECT * FROM residents";
 $resident_list = mysqli_query($connection, $query1);
@@ -60,7 +61,28 @@ if (isset($_POST['transact'])) {
                     // Check monthly salary
                     if ($info['monthly_salary'] <= 14000) {
                         $birth_year = intval(date_format(date_create($info['birth_date']), "Y"));
-                        
+                        if ($birth_year > $year) {
+                            $errors['transaction'] = "Resident not yet alive during year of registration.";
+                        } else {
+                            $age = $year - $birth_year;
+                            $counter = $age;
+
+                            $grant = 0;
+
+                            while ($counter <= 17) {
+                                if ($counter >= 4 && $counter <= 11) {
+                                    $grant += (300 * 12);
+                                } else if ($counter >= 12 && $counter <= 15) {
+                                    $grant += (500 * 12);
+                                } else if ($counter >= 16 && $counter <= 17) {
+                                    $grant += (700 * 12);
+                                }
+                                
+                                $counter++;
+                            }
+                        }
+                    } else {
+                        $errors['transaction'] = "Resident is not eligible for cash grant due to their family's average monthly salary.";
                     }
                 }
             }
@@ -98,18 +120,18 @@ if (isset($_POST['transact'])) {
             <?php
             if (isset($_POST['transact']) && isset($errors['resident_code'])) {
                 ?>
-                <p class="error-msg"><?= $errors['resident_code'] ?></p>
+                <p class="error_msg"><?= $errors['resident_code'] ?></p>
                 <?php
             }
             ?>
         </div>
         <div class="form-control">
             <label for="year">Year of Application</label>
-            <input type="number" name="year" id="year" min="1900" max="2099" />
+            <input type="number" name="year" id="year" min="1900" max="2099" value="<?= $year ?? null ?>" />
             <?php
             if (isset($_POST['transact']) && isset($errors['year'])) {
                 ?>
-                <p class="error-msg"><?= $errors['year'] ?></p>
+                <p class="error_msg"><?= $errors['year'] ?></p>
                 <?php
             }
             ?>
@@ -119,5 +141,24 @@ if (isset($_POST['transact'])) {
             <button type="submit" name="transact">Calculate Cash Grant</button>
         </div>
     </form>
+    <br>
+
+    <?php
+    if (isset($_POST['transact']) && count($errors) == 0) {
+        ?>
+        <p>Resident Code: <?= $resident_code ?></p>
+        <p>Year of Application: <?= $year ?></p>
+        <?php
+    }
+    if ($grant > 0) {
+        ?>
+        <p>Total Cash Grant: Php <?= number_format($grant, 2) ?></p>
+        <?php
+    } else if (isset($errors['transaction'])) {
+        ?>
+        <p class="error_msg"><?= $errors['transaction'] ?></p>
+        <?php
+    }
+    ?>
 </body>
 </html>
