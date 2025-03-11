@@ -66,12 +66,31 @@ if (isset($_POST['add'])) {
         $resident_code = generateResidentCode($family_name, $birth_date); // Generate resident code based on family name and birth date.
 
         $query = "INSERT INTO residents (resident_code, family_name, given_name, middle_name, birth_date, monthly_salary)
-                    VALUES ('$resident_code', '$family_name', '$given_name', '$middle_name', '$birth_date', '$monthly_salary');";
-        if ($connection->query($query)) {
-            $connection->close();
-            header("Location: index.php");
-        } else { // DB connection error handling (useful for debugging)
-            echo "Error: " . $connection->error;
+                    VALUES (?, ?, ?, ?, ?, ?)";
+        $statement = $connection->prepare($query);
+
+        if ($statement) {
+            $statement->bind_param("sssssd",
+                            $resident_code,
+                            $family_name,
+                            $given_name,
+                            $middle_name,
+                            $birth_date,
+                            $monthly_salary);
+
+            if ($statement->execute()) {
+                $statement->close();
+                header("Location: index.php");
+                exit;
+            } else {
+                error_log("Insert error: " . $statement->error);
+                echo "Error: Failed to add resident.";
+                $statement->close();
+            }
+
+        } else {
+            error_log("Prepare error: " . $connection->error);
+            error_log("Database error: " . $connection->error);
         }
     }
 }
