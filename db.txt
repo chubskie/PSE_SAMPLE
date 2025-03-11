@@ -1,0 +1,9 @@
+CREATE TABLE residents(
+    resident_code VARCHAR(100) NOT NULL;
+    family_name VARCHAR(40) NOT NULL,
+    given_name VARCHAR(40) NOT NULL,
+    middle_name VARCHAR(40),
+    birth_date DATE NOT NULL,
+    monthly_salary DECIMAL(19,3) NOT NULL,
+    PRIMARY KEY (resident_code)
+);
