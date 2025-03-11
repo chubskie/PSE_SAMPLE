@@ -92,7 +92,7 @@ form {
     padding: 0.25rem 0.5rem;
 }
 
-.form-control .error_msg {
+.error_msg {
     color: red;
     font-style: italic;
 }
