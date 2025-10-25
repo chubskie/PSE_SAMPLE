@@ -101,6 +101,7 @@ if (isset($_POST['transact'])) {
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <a href="index.php">Go Back</a>
     <h1>Transaction Module</h1>
     <form action="transact.php" method="POST">
         <div class="form-control">
